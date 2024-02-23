@@ -9,6 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 710469970880035259}
+  - component: {fileID: 3145781257016025338}
+  - component: {fileID: 7755817911817948416}
+  - component: {fileID: 4342154692844635960}
   m_Layer: 0
   m_Name: normalTilePrefab
   m_TagString: Untagged
@@ -32,6 +35,62 @@ Transform:
   - {fileID: 1663091346307641532}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3145781257016025338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3253954407642254681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2677aff3505dca2439d4b3a31af182aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Score: 
+  movableComponent: {fileID: 7755817911817948416}
+  tileDesign: {fileID: 4342154692844635960}
+--- !u!114 &7755817911817948416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3253954407642254681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5480a88e395cd04a87c6022f2a21503, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4342154692844635960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3253954407642254681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd0db6608db1acb4ba7ec74b7d670bbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  designSprites:
+  - design: 0
+    sprite: {fileID: 21300000, guid: ab4fe30ec3f48724fb79cbe537b422fb, type: 3}
+  - design: 1
+    sprite: {fileID: 21300000, guid: 6cf08bee8073dc143bdb225ea3c1ebb7, type: 3}
+  - design: 0
+    sprite: {fileID: 0}
+  - design: 2
+    sprite: {fileID: 21300000, guid: 335087c27c5076c48ba31341548716c6, type: 3}
+  - design: 3
+    sprite: {fileID: 21300000, guid: 854ce565762d2ef49abafa59d8f90af1, type: 3}
+  - design: 4
+    sprite: {fileID: 21300000, guid: 05c2d6661fc81064698d2c11fb5ba281, type: 3}
+  - design: 5
+    sprite: {fileID: 21300000, guid: 9474ef08e9793d84782bc66f6ff7ab4c, type: 3}
+  - design: 6
+    sprite: {fileID: 21300000, guid: cb149c67a9f06ed40a8b45941760b0a0, type: 3}
 --- !u!1 &8275142536048411340
 GameObject:
   m_ObjectHideFlags: 0
@@ -42,9 +101,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1663091346307641532}
   - component: {fileID: 6205784530149964363}
-  - component: {fileID: 4356464996391577207}
-  - component: {fileID: 568769993006841438}
-  - component: {fileID: 495213872046563478}
   m_Layer: 0
   m_Name: tileImg
   m_TagString: Untagged
@@ -119,43 +175,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4356464996391577207
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8275142536048411340}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2677aff3505dca2439d4b3a31af182aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Score: 
-  movableComponent: {fileID: 0}
-  tileDesign: {fileID: 0}
---- !u!114 &568769993006841438
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8275142536048411340}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5480a88e395cd04a87c6022f2a21503, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &495213872046563478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8275142536048411340}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd0db6608db1acb4ba7ec74b7d670bbe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  designSprites: []
