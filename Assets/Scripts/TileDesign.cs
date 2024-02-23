@@ -43,7 +43,7 @@ public class TileDesign : MonoBehaviour
 
     private void Awake()
     {
-        sprite = transform.Find("normalTile").GetComponent<SpriteRenderer>();
+        sprite = transform.Find("tileImg").GetComponent<SpriteRenderer>();
         designSpriteDict = new Dictionary<DesignType, Sprite>();
 
         for(int i = 0; i < designSprites.Length; i++)

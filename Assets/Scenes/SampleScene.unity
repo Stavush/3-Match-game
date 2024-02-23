@@ -294,7 +294,7 @@ MonoBehaviour:
   tileBGPrefab: {fileID: 4046744690616200886, guid: 4b00bff8b5597824d962392b0f93d9a7, type: 3}
   tilePrefabs:
   - type: 0
-    prefab: {fileID: 9030053333238972737, guid: 98a611c9983e2b444973184b31315efb, type: 3}
+    prefab: {fileID: 3253954407642254681, guid: f5692f37288bcee4f8ccd0f41656ec99, type: 3}
 --- !u!4 &441035023
 Transform:
   m_ObjectHideFlags: 0

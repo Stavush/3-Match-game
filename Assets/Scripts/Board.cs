@@ -69,7 +69,7 @@ public class Board : MonoBehaviour
                 }
                 if (tiles[x, y].HasDesign())
                 {
-                    tiles[x, y].DesignComponent.SetDesign(TileDesign.DesignType);
+                    tiles[x, y].DesignComponent.SetDesign((TileDesign.DesignType)Random.Range(0, tiles[x,y].tileDesign.DesignSpritesAmount));
                 }
             }
         }
