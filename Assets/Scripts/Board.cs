@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -9,12 +10,14 @@ public class Board : MonoBehaviour
     {
         EMPTY,
         NORMAL,
-        BLOCKED,
+        OBSTACLE,
+        ROW_CLEAR,
+        COLUMN_CLEAR,
         COUNT,
     };
 
-    [SerializeField] private int xDim; //x
-    [SerializeField] private int yDim; //y
+    [SerializeField] private int width; //x
+    [SerializeField] private int height; //y
     [SerializeField] private float fillTime;
 
     [SerializeField] private GameObject tileBGPrefab;
@@ -31,29 +34,34 @@ public class Board : MonoBehaviour
 
     private Tile[,] tiles;
 
-    private Tile PressedTile;
-    private Tile EnteredTile;
+    private Tile pressedTile;
+    private Tile enteredTile;
 
     void Start()
     {
+        InitializeTilePrefabDictionary();
+        InitBoard();
+    }
+
+    private void InitializeTilePrefabDictionary()
+    {
         tilePrefabDict = new Dictionary<TileType, GameObject>();
-        for(int i=0; i<tilePrefabs.Length; i++)
+        foreach (var prefab in tilePrefabs)
         {
-            if (!tilePrefabDict.ContainsKey(tilePrefabs[i].type))
+            if (!tilePrefabDict.ContainsKey(prefab.type))
             {
-                tilePrefabDict.Add(tilePrefabs[i].type, tilePrefabs[i].prefab);
+                tilePrefabDict[prefab.type] = prefab.prefab;
             }
         }
-        InitBoard();
     }
 
     private void InitBoard()
     {
-        tiles = new Tile[xDim, yDim];
+        tiles = new Tile[width, height];
 
-        for (int x = 0; x < xDim; x++)
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < yDim; y++)
+            for (int y = 0; y < height; y++)
             {
                 Vector3 position = new Vector3(x, y, 0);
 
@@ -72,8 +80,8 @@ public class Board : MonoBehaviour
     public Vector2 GetPosition(int x, int y)
     {
         return new Vector2(x, y);
-        //return new Vector2(transform.position.x - xDim / 2.0f + x,
-            //transform.position.y + yDim / 2.0f - y);
+        //return new Vector2(transform.position.x - width / 2.0f + x,
+            //transform.position.y + height / 2.0f - y);
     }
 
     public Tile CreateNewTile(int x, int y, TileType type)
@@ -89,18 +97,28 @@ public class Board : MonoBehaviour
 
     public IEnumerator FillBoard()
     {
-        while (SingleFill())
+        bool refillNeeded = true;
+
+        while (refillNeeded)
         {
             yield return new WaitForSeconds(fillTime);
+
+            while (SingleFill())
+            {
+                yield return new WaitForSeconds(fillTime);
+            }
+
+            refillNeeded = ClearAllMatches();
         }
+        
     }
 
     public bool SingleFill()
     {
         bool isTileMoved = false;
-        for(int y=yDim-2; y>=0; y--)
+        for(int y=height-2; y>=0; y--)
         {
-            for(int x=0; x<xDim; x++)
+            for(int x=0; x<width; x++)
             {
                 Tile tile = tiles[x,y];
                 if (tile.IsMovable())
@@ -118,7 +136,7 @@ public class Board : MonoBehaviour
         }
 
         // Check the top row
-        for(int x=0; x<xDim; x++)
+        for(int x=0; x<width; x++)
         {
             Tile tileBelow = tiles[x, 0];
             if(tileBelow.Type == TileType.EMPTY)
@@ -145,18 +163,34 @@ public class Board : MonoBehaviour
 
     public void SwapTiles(Tile tile1, Tile tile2)
     {
-        if(IsSwapable(tile1, tile2) && tile1.IsMovable() && tile2.IsMovable())
+        if (IsSwapable(tile1, tile2) && tile1.IsMovable() && tile2.IsMovable())
         {
             tiles[tile1.X, tile1.Y] = tile2;
             tiles[tile2.X, tile2.Y] = tile1;
 
-            if (GetMatch(tile1, tile2.X, tile2.Y)!=null || GetMatch(tile2 ,tile1.X, tile1.Y)!= null)
+            if (GetMatch(tile1, tile2.X, tile2.Y) != null || GetMatch(tile2, tile1.X, tile1.Y) != null)
             {
                 int tile1X = tile1.X;
                 int tile1Y = tile1.Y;
 
                 tile1.MovableComponent.MoveTile(tile2.X, tile2.Y, fillTime);
                 tile2.MovableComponent.MoveTile(tile1X, tile1Y, fillTime);
+
+                ClearAllMatches();
+
+                if(tile1.Type == TileType.ROW_CLEAR || tile1.Type == TileType.COLUMN_CLEAR)
+                {
+                    ClearTile(tile1.X, tile1.Y);
+                }
+                if (tile2.Type == TileType.ROW_CLEAR || tile2.Type == TileType.COLUMN_CLEAR)
+                {
+                    ClearTile(tile2.X, tile2.Y);
+                }
+
+                pressedTile = null;
+                enteredTile = null;
+
+                StartCoroutine(FillBoard());
             }
             else
             {
@@ -168,223 +202,135 @@ public class Board : MonoBehaviour
 
     public void PressTile(Tile tile)
     {
-        PressedTile = tile;
+        pressedTile = tile;
     }
 
     public void EnterTile(Tile tile)
     {
-        EnteredTile = tile;
+        enteredTile = tile;
     }
 
     public void OnMouseRelease()
     {
-        if(IsSwapable(PressedTile, EnteredTile))
+        if(IsSwapable(pressedTile, enteredTile))
         {
-            SwapTiles(PressedTile, EnteredTile);
+            SwapTiles(pressedTile, enteredTile);
         }
     }
 
     public List<Tile> GetMatch(Tile tile, int newX, int newY)
     {
-        if (tile.HasDesign())
+        if (!tile.HasDesign()) return null;
+
+        TileDesign.DesignType design = tile.DesignComponent.Design;
+        var horizontalMatches = FindMatches(tile, newX, newY, true);
+        var verticalMatches = FindMatches(tile, newX, newY, false);
+
+        var allMatches = new HashSet<Tile>(horizontalMatches.Concat(verticalMatches));
+        return allMatches.Count >= 3 ? allMatches.ToList() : null;
+    }
+
+    private List<Tile> FindMatches(Tile originTile, int newX, int newY, bool horizontal)
+    {
+        List<Tile> matches = new List<Tile> { originTile };
+        int[] directions = { -1, 1 }; // Represents left/up and right/down
+
+        foreach (var dir in directions)
         {
-            TileDesign.DesignType design = tile.DesignComponent.Design;
-            List<Tile> horizontalTiles = new List<Tile>();
-            List<Tile> verticalTiles = new List<Tile>();
-            List<Tile> matchingTiles= new List<Tile>();
-
-
-            // Check horizontal tiles for match
-            horizontalTiles.Add(tile);
-
-            for(int dir = 0; dir <= 1; dir++) // loop that changes direction
+            int distance = 1;
+            while (true)
             {
-                for(int xDist=1; xDist < xDim; xDist++) // lop through adjecent tiles
+                int x = horizontal ? newX + dir * distance : newX;
+                int y = horizontal ? newY : newY + dir * distance;
+
+                if (x < 0 || x >= width || y < 0 || y >= height) break;
+                Tile tile = tiles[x, y];
+
+                if (tile.HasDesign() && tile.DesignComponent.Design == originTile.DesignComponent.Design)
                 {
-                    int x;
-                    
-                    if (dir == 0)
-                    {
-                        x = newX - xDist;
-                    }
-                    else
-                    {
-                        x = newX + xDist;
-                    }
-
-                    if(x<0 || x>= xDim)
-                    {
-                        break;
-                    }
-
-                    if (tiles[x, newY].HasDesign() && tiles[x, newY].DesignComponent.Design == design)
-                    {
-                        horizontalTiles.Add(tiles[ x, newY]);
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    matches.Add(tile);
+                    distance++;
                 }
-            }
-
-            if(horizontalTiles.Count >= 3) // check if there's a match of 3 or more
-            {
-                for (int i = 0; i< horizontalTiles.Count;i++)
-                {
-                    matchingTiles.Add(horizontalTiles[i]);
-                }
-            }
-
-            if (horizontalTiles.Count >= 3)
-            {
-                for(int i=0; i<horizontalTiles.Count; i++)
-                {
-                    for(int dir=0; dir <= 1; dir++)
-                    {
-                        for(int yDist=1; yDist < yDim; yDist++)
-                        {
-                            int y;
-
-                            if (dir == 0)
-                            {
-                                y = newY- yDist;
-                            }
-                            else
-                            {
-                                y = newY + yDist;
-                            }
-                            if(y<0 || y>=yDist)
-                            {
-                                break;
-                            }
-                            if (tiles[horizontalTiles[i].X, y].HasDesign() && tiles[horizontalTiles[i].X, y].DesignComponent.Design == design) {
-                                verticalTiles.Add(tiles[horizontalTiles[i].X, y]);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    if(verticalTiles.Count < 2) {
-                        verticalTiles.Clear();
-                    }
-                    else
-                    {
-                        for(int j=0; j<verticalTiles.Count; j++)
-                        {
-                            matchingTiles.Add(verticalTiles[j]);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (matchingTiles.Count >= 3)
-            {
-                return matchingTiles;
-            }
-
-            // Check vertical tiles for match
-            verticalTiles.Clear ();
-            horizontalTiles.Clear ();
-            verticalTiles.Add(tile);
-
-            for (int i = 0; i <= 1; i++) // loop that changes direction
-            {
-                for (int yDist = 1; yDist < yDim; yDist++) // lop through adjecent tiles
-                {
-                    int y;
-                    if (i == 0)
-                    {
-                        y = newY - yDist;
-                    }
-                    else
-                    {
-                        y = newY + yDist;
-                    }
-
-                    if (y < 0 || y >= yDim)
-                    {
-                        break;
-                    }
-
-                    if (tiles[newX, y].HasDesign() && tiles[newX, y].DesignComponent.Design == design)
-                    {
-                        verticalTiles.Add(tiles[newX, y]);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if (verticalTiles.Count >= 3) // check if there's a match of 3 or more
-            {
-                for (int i = 0; i < verticalTiles.Count; i++)
-                {
-                    matchingTiles.Add(verticalTiles[i]);
-                }
-            }
-
-            if (verticalTiles.Count >= 3)
-            {
-                for (int i = 0; i < verticalTiles.Count; i++)
-                {
-                    for (int dir = 0; dir <= 1; dir++)
-                    {
-                        for (int xDist = 1; xDist < yDim; xDist++)
-                        {
-                            int x;
-
-                            if (dir == 0) // search to left
-                            {
-                                x = newX - xDist;
-                            }
-                            else
-                            {
-                                // search to right
-                                x = newX + xDist;
-                            }
-                            if (x < 0 || x >= xDist)
-                            {
-                                break;
-                            }
-                            if (tiles[x, verticalTiles[i].Y].HasDesign() && tiles[x, verticalTiles[i].Y].DesignComponent.Design == design)
-                            {
-                                verticalTiles.Add(tiles[x,verticalTiles[i].Y]);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    if (horizontalTiles.Count < 2)
-                    {
-                        horizontalTiles.Clear();
-                    }
-                    else
-                    {
-                        for (int j = 0; j < horizontalTiles.Count; j++)
-                        {
-                            matchingTiles.Add(horizontalTiles[j]);
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (matchingTiles.Count >= 3)
-            {
-                return matchingTiles;
+                else break;
             }
         }
 
-        return null;
+        return matches;
     }
 
+    public bool ClearAllMatches()
+    {
+        bool refillNeeded = false;
+        for(int y=0; y<height; y++)
+        {
+            for(int x=0; x<width; x++)
+            {
+                if (tiles[x, y].IsClearable())
+                {
+                    List<Tile> match = GetMatch(tiles[x, y], x, y);
+
+                    if (match != null)
+                    {
+                        TileType specialTileType = TileType.COUNT;
+                        Tile randomTile = match[Random.Range(0, match.Count)];
+                        int specialTileX = randomTile.X;
+                        int specialTileY = randomTile.Y;
+
+                        if(match.Count == 4)
+                        {
+                            if(pressedTile == null || enteredTile == null )
+                            {
+                                specialTileType = (TileType)Random.Range((int)TileType.ROW_CLEAR, (int)TileType.COLUMN_CLEAR);
+                            }
+                            else if(pressedTile.Y == enteredTile.Y)
+                            {
+                                specialTileType = TileType.ROW_CLEAR;
+                            }
+                            else
+                            {
+                                specialTileType = TileType.COLUMN_CLEAR;
+                            }
+                        }
+
+                        foreach(Tile tile in match)
+                        {
+                            if (ClearTile(tile.X, tile.Y))
+                            {
+                                refillNeeded = true;
+
+                                if (tile == pressedTile || tile == enteredTile)
+                                {
+                                    specialTileX = tile.X;
+                                    specialTileY = tile.Y;
+                                }
+                            }
+                        }
+                        if(specialTileType != TileType.COUNT)
+                        {
+                            Destroy(tiles[specialTileX, specialTileY]);
+                            Tile newTile = CreateNewTile(specialTileX, specialTileY, specialTileType);
+
+                            if ((specialTileType == TileType.ROW_CLEAR || specialTileType == TileType.COLUMN_CLEAR) && newTile.HasDesign() && match[0].HasDesign())
+                            {
+                                newTile.DesignComponent.SetDesign(match[0].DesignComponent.Design);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return refillNeeded;
+    }
+    
+    public bool ClearTile(int x, int y)
+    {
+        if (tiles[x, y].IsClearable() && !tiles[x, y].ClearableComponent.IsCleared)
+        {
+            tiles[x, y].ClearableComponent.Clear();
+            CreateNewTile(x, y, TileType.EMPTY);
+
+            return true;
+        }
+        return false;
+    }
 }

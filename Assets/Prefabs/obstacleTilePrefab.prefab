@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1439704876553706585}
   - component: {fileID: 6453776655625413293}
   m_Layer: 0
-  m_Name: blockedTilePrefab
+  m_Name: obstacleTilePrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
