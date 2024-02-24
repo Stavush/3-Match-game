@@ -5,32 +5,32 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    private int column;
-    private int row;
+    private int x;
+    private int y;
     private Board.TileType type;
     private Board board;
     [SerializeField] private string Score;
     public MovableTile movableComponent;
     public TileDesign tileDesign;
 
-    public int Column
+    public int X
     {
-        get { return column; } 
+        get { return x; } 
         set {
             if (IsMovable())
             {
-                column = value;
+                x = value;
             }
         }
     }
 
-    public int Row
+    public int Y
     {
-        get { return row; }
+        get { return y; }
         set {
             if (IsMovable())
             {
-                row = value;
+                y = value;
             }
              }
     }
@@ -55,10 +55,19 @@ public class Tile : MonoBehaviour
         get { return tileDesign; }
     }
 
+    private ClearableTile clearableComponent;
+
+    public ClearableTile ClearableComponent
+    {
+        get { return clearableComponent; }
+    }
+
+
     private void Awake()
     {
         movableComponent = GetComponent<MovableTile>();
         tileDesign = GetComponent<TileDesign>();
+        clearableComponent = GetComponent<ClearableTile>();
     }
 
 
@@ -74,10 +83,10 @@ public class Tile : MonoBehaviour
         
     }
 
-    public void Init(int _col, int _row, Board _board, Board.TileType _type)
+    public void Init(int _x, int _y, Board _board, Board.TileType _type)
     {
-        column= _col;
-        row= _row;
+        x= _x;
+        y= _y;
         board= _board;
         type= _type;
     }
@@ -87,8 +96,30 @@ public class Tile : MonoBehaviour
         return movableComponent != null;
     }
 
+    public bool IsClearable()
+    {
+        return clearableComponent != null;
+    }
+
     public bool HasDesign()
     {
         return tileDesign != null;
+    }
+
+    private void OnMouseEnter()
+    {
+        board.EnterTile(this);
+    }
+
+    private void OnMouseDown() 
+    { 
+        // When pressed
+        board.PressTile(this);
+    }
+
+    private void OnMouseUp()
+    {
+        // When released
+        board.OnMouseRelease();
     }
 }
