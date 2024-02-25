@@ -13,7 +13,7 @@ public class TileDesign : MonoBehaviour
         PINK,
         PURPLE,
         RED,
-        JOKER,
+        ANY,
         COUNT
     }
 

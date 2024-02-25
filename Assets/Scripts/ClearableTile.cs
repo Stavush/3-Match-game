@@ -20,19 +20,7 @@ public class ClearableTile : MonoBehaviour
         tile = GetComponent<Tile>();
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void Clear()
+    public virtual void Clear()
     {
         isCleared = true;
         StartCoroutine(ClearCoroutine());
@@ -43,7 +31,7 @@ public class ClearableTile : MonoBehaviour
         Animator animator = GetComponent<Animator>();
         if (animator)
         {
-            animator.Play(clearAnimation.name);
+            animator.Play(clearAnimation.name.ToString());
             yield return new WaitForSeconds(clearAnimation.length);
 
             Destroy(gameObject);

@@ -13,6 +13,7 @@ public class Board : MonoBehaviour
         OBSTACLE,
         ROW_CLEAR,
         COLUMN_CLEAR,
+        JOKER,
         COUNT,
     };
 
@@ -95,6 +96,8 @@ public class Board : MonoBehaviour
         return tiles[x, y];
     }
 
+
+    // A function that fills the whole board
     public IEnumerator FillBoard()
     {
         bool refillNeeded = true;
@@ -168,7 +171,7 @@ public class Board : MonoBehaviour
             tiles[tile1.X, tile1.Y] = tile2;
             tiles[tile2.X, tile2.Y] = tile1;
 
-            if (GetMatch(tile1, tile2.X, tile2.Y) != null || GetMatch(tile2, tile1.X, tile1.Y) != null)
+            if (GetMatch(tile1, tile2.X, tile2.Y) != null || GetMatch(tile2, tile1.X, tile1.Y) != null || tile1.Type == TileType.JOKER || tile2.Type == TileType.JOKER)
             {
                 int tile1X = tile1.X;
                 int tile1Y = tile1.Y;
@@ -176,9 +179,34 @@ public class Board : MonoBehaviour
                 tile1.MovableComponent.MoveTile(tile2.X, tile2.Y, fillTime);
                 tile2.MovableComponent.MoveTile(tile1X, tile1Y, fillTime);
 
+                // clear joker tile
+                if(tile1.Type == TileType.JOKER && tile1.IsClearable() && tile2.HasDesign())
+                {
+                    ClearDesignTile clearDesign = tile1.GetComponent<ClearDesignTile>();
+                    if (clearDesign)
+                        {
+                        clearDesign.Design = tile2.DesignComponent.Design;
+                    }
+                    ClearTile(tile1.X, tile1.Y);
+                }
+
+                if (tile2.Type == TileType.JOKER && tile2.IsClearable() && tile1.HasDesign())
+                {
+                    ClearDesignTile clearDesign = tile2.GetComponent<ClearDesignTile>();
+                    if (clearDesign)
+                    {
+                        clearDesign.Design = tile1.DesignComponent.Design;
+                    }
+                    ClearTile(tile2.X, tile2.Y);
+
+                }
+
                 ClearAllMatches();
 
-                if(tile1.Type == TileType.ROW_CLEAR || tile1.Type == TileType.COLUMN_CLEAR)
+                pressedTile = null;
+                enteredTile = null;
+
+                if (tile1.Type == TileType.ROW_CLEAR || tile1.Type == TileType.COLUMN_CLEAR)
                 {
                     ClearTile(tile1.X, tile1.Y);
                 }
@@ -187,8 +215,7 @@ public class Board : MonoBehaviour
                     ClearTile(tile2.X, tile2.Y);
                 }
 
-                pressedTile = null;
-                enteredTile = null;
+                
 
                 StartCoroutine(FillBoard());
             }
@@ -272,6 +299,7 @@ public class Board : MonoBehaviour
                     if (match != null)
                     {
                         TileType specialTileType = TileType.COUNT;
+
                         Tile randomTile = match[Random.Range(0, match.Count)];
                         int specialTileX = randomTile.X;
                         int specialTileY = randomTile.Y;
@@ -290,6 +318,9 @@ public class Board : MonoBehaviour
                             {
                                 specialTileType = TileType.COLUMN_CLEAR;
                             }
+                        } else if(match.Count > 4)
+                        {
+                            specialTileType = TileType.JOKER;
                         }
 
                         foreach(Tile tile in match)
@@ -314,6 +345,10 @@ public class Board : MonoBehaviour
                             {
                                 newTile.DesignComponent.SetDesign(match[0].DesignComponent.Design);
                             }
+                            else if (specialTileType == TileType.JOKER && newTile.HasDesign())
+                            {
+                                newTile.DesignComponent.SetDesign(TileDesign.DesignType.ANY);
+                            }
                         }
                     }
                 }
@@ -332,5 +367,36 @@ public class Board : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public void ClearRow(int row)
+    {
+        for(int x=0; x<width; x++)
+        {
+            ClearTile(x, row);
+        }
+    }
+
+    public void ClearColumn(int col)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            ClearTile(col, y);
+        }
+    }
+
+    public void ClearDesign(TileDesign.DesignType design)
+    {
+        for(int x=0; x<width; x++)
+        {
+            for(int y=0; y<height; y++)
+            {
+                if (tiles[x, y].HasDesign() && (tiles[x,y].DesignComponent.Design == design) || (design == TileDesign.DesignType.ANY))
+                {
+                    ClearTile(x, y);
+
+                }
+            }
+        }
     }
 }

@@ -373,8 +373,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db25324db90d8a54490805b95a1ad09f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 0
-  height: 0
+  width: 9
+  height: 9
   fillTime: 0.1
   tileBGPrefab: {fileID: 4046744690616200886, guid: 4b00bff8b5597824d962392b0f93d9a7, type: 3}
   tilePrefabs:
@@ -388,6 +388,8 @@ MonoBehaviour:
     prefab: {fileID: 4008996304185963249, guid: a1d42ceec633da842a1e5a4a21dbb572, type: 3}
   - type: 3
     prefab: {fileID: 6300898345267290694, guid: f9a3f8623aeca10449cd6d9e90bd318c, type: 3}
+  - type: 5
+    prefab: {fileID: 4478542739962017884, guid: 9650a8d134d070449bd859363f5c6aed, type: 3}
 --- !u!4 &441035023
 Transform:
   m_ObjectHideFlags: 0
