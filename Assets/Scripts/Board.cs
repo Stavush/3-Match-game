@@ -21,6 +21,10 @@ public class Board : MonoBehaviour
     [SerializeField] private int height; //y
     [SerializeField] private float fillTime;
 
+    public Level level;
+
+    private bool gameOver = false;
+
     [SerializeField] private GameObject tileBGPrefab;
     public TilePrefab[] tilePrefabs;
 
@@ -34,6 +38,8 @@ public class Board : MonoBehaviour
     private Dictionary<TileType, GameObject> tilePrefabDict;
 
     private Tile[,] tiles;
+
+    private bool inverse = false;
 
     private Tile pressedTile;
     private Tile enteredTile;
@@ -75,6 +81,11 @@ public class Board : MonoBehaviour
             }
         }
 
+        Destroy(tiles[2, 5].gameObject);
+        Destroy(tiles[6, 5].gameObject);
+        CreateNewTile(2,5, TileType.OBSTACLE);
+        CreateNewTile(6, 5, TileType.OBSTACLE);
+
         StartCoroutine(FillBoard());
     }
 
@@ -108,6 +119,7 @@ public class Board : MonoBehaviour
 
             while (SingleFill())
             {
+                inverse = !inverse;
                 yield return new WaitForSeconds(fillTime);
             }
 
@@ -121,8 +133,15 @@ public class Board : MonoBehaviour
         bool isTileMoved = false;
         for(int y=height-2; y>=0; y--)
         {
-            for(int x=0; x<width; x++)
+            for(int loopX=0; loopX<width; loopX++)
             {
+                int x = loopX;
+
+                if (inverse)
+                {
+                    x = width - 1 - loopX;
+                }
+
                 Tile tile = tiles[x,y];
                 if (tile.IsMovable())
                 {
@@ -133,6 +152,52 @@ public class Board : MonoBehaviour
                         tiles[x, y + 1] = tile;
                         CreateNewTile(x, y, TileType.EMPTY);
                         isTileMoved = true;
+                    }
+                    else
+                    {
+                        // diagonally fill board
+                        for(int diag=-1; diag <=1; diag++)
+                        {
+                            if (diag != 0)
+                            {
+                                int diagX = x + diag;
+                                if (inverse)
+                                {
+                                    diagX = x - diag;
+                                }
+                                if(diagX >=0 && diagX < width)
+                                {
+                                    Tile diagonalTile = tiles[diagX, y + 1];
+                                    if(diagonalTile.Type == TileType.EMPTY)
+                                    {
+                                        bool hasTileAbove = true;
+
+                                        for(int aboveY = y; aboveY >= 0; aboveY--)
+                                        {
+                                            Tile tileAbove = tiles[diagX, aboveY];
+                                            if (tileAbove.IsMovable())
+                                            {
+                                                break;
+                                            }
+                                            else if(!tileAbove.IsMovable() && tileAbove.Type != TileType.EMPTY)
+                                            {
+                                                hasTileAbove = false;
+                                                break;
+                                            }
+                                        }
+                                        if (!hasTileAbove)
+                                        {
+                                            Destroy(diagonalTile.gameObject);
+                                            tile.movableComponent.MoveTile(diagX, y + 1, fillTime);
+                                            tiles[diagX, y + 1] = tile;
+                                            CreateNewTile(x, y, TileType.EMPTY);
+                                            isTileMoved = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -166,6 +231,11 @@ public class Board : MonoBehaviour
 
     public void SwapTiles(Tile tile1, Tile tile2)
     {
+        if (gameOver)
+        {
+            return;
+        }
+
         if (IsSwapable(tile1, tile2) && tile1.IsMovable() && tile2.IsMovable())
         {
             tiles[tile1.X, tile1.Y] = tile2;
@@ -203,9 +273,6 @@ public class Board : MonoBehaviour
 
                 ClearAllMatches();
 
-                pressedTile = null;
-                enteredTile = null;
-
                 if (tile1.Type == TileType.ROW_CLEAR || tile1.Type == TileType.COLUMN_CLEAR)
                 {
                     ClearTile(tile1.X, tile1.Y);
@@ -215,9 +282,12 @@ public class Board : MonoBehaviour
                     ClearTile(tile2.X, tile2.Y);
                 }
 
-                
+                pressedTile = null;
+                enteredTile = null;
 
                 StartCoroutine(FillBoard());
+
+                level.OnTileSwap();
             }
             else
             {
@@ -398,5 +468,10 @@ public class Board : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void GameOver()
+    {
+        gameOver = true;
     }
 }

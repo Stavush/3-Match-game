@@ -7,9 +7,11 @@ public class Tile : MonoBehaviour
 {
     private int x;
     private int y;
-    private Board.TileType type;
+    [SerializeField] private int score;
+
     private Board board;
-    [SerializeField] private string Score;
+    private Board.TileType type;
+    
     public MovableTile movableComponent;
     public TileDesign tileDesign;
 
@@ -60,6 +62,11 @@ public class Tile : MonoBehaviour
     public ClearableTile ClearableComponent
     {
         get { return clearableComponent; }
+    }
+
+    public int Score
+    {
+        get { return score; }
     }
 
 

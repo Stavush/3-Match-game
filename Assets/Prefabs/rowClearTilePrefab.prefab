@@ -50,7 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2677aff3505dca2439d4b3a31af182aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Score: 
+  score: 600
   movableComponent: {fileID: 4888897857736182183}
   tileDesign: {fileID: 1700134743488179057}
 --- !u!114 &4888897857736182183

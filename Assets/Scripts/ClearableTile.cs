@@ -22,6 +22,7 @@ public class ClearableTile : MonoBehaviour
 
     public virtual void Clear()
     {
+        tile.BoardRef.level.OnTileClear(tile);
         isCleared = true;
         StartCoroutine(ClearCoroutine());
     }

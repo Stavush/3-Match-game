@@ -134,7 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2677aff3505dca2439d4b3a31af182aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Score: 
+  score: 1000
   movableComponent: {fileID: 1256609117317161912}
   tileDesign: {fileID: 6470814889538992107}
 --- !u!114 &1256609117317161912
