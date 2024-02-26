@@ -353,7 +353,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 208231637}
-  - component: {fileID: 208231636}
+  - component: {fileID: 208231638}
   m_Layer: 0
   m_Name: Level
   m_TagString: Untagged
@@ -361,22 +361,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &208231636
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 208231635}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f4c383f5bed4a241811eedd672f7563, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  board: {fileID: 0}
-  score1Star: 0
-  score2Star: 0
-  score3Star: 0
 --- !u!4 &208231637
 Transform:
   m_ObjectHideFlags: 0
@@ -392,6 +376,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &208231638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 208231635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da40081e3e10f024d8c8a300ba2b9760, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  board: {fileID: 441035022}
+  score1Star: 15000
+  score2Star: 18000
+  score3Star: 20000
+  movesNumber: 20
+  targetScore: 15000
 --- !u!1 &441035021
 GameObject:
   m_ObjectHideFlags: 0
@@ -421,10 +423,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db25324db90d8a54490805b95a1ad09f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 9
+  width: 7
   height: 9
   fillTime: 0.1
-  level: {fileID: 208231636}
+  level: {fileID: 208231638}
   tileBGPrefab: {fileID: 4046744690616200886, guid: 4b00bff8b5597824d962392b0f93d9a7, type: 3}
   tilePrefabs:
   - type: 0
@@ -443,16 +445,7 @@ MonoBehaviour:
     type: 0
     x: 0
     y: 0
-  initialTiles:
-  - type: 2
-    x: 3
-    y: 5
-  - type: 2
-    x: 6
-    y: 5
-  - type: 2
-    x: 4
-    y: 7
+  initialTiles: []
 --- !u!4 &441035023
 Transform:
   m_ObjectHideFlags: 0

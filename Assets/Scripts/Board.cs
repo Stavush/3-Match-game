@@ -35,6 +35,17 @@ public class Board : MonoBehaviour
         public GameObject prefab;
     };
 
+    [System.Serializable]
+    public struct TilePosition
+    {
+        public TileType type;
+        public int x;
+        public int y;
+    };
+
+    public TilePosition tilePosition;
+    public TilePosition[] initialTiles;
+
     private Dictionary<TileType, GameObject> tilePrefabDict;
 
     private Tile[,] tiles;
@@ -44,7 +55,7 @@ public class Board : MonoBehaviour
     private Tile pressedTile;
     private Tile enteredTile;
 
-    void Start()
+    void Awake()
     {
         InitializeTilePrefabDictionary();
         InitBoard();
@@ -66,6 +77,14 @@ public class Board : MonoBehaviour
     {
         tiles = new Tile[width, height];
 
+        for(int i = 0; i<initialTiles.Length; i++)
+        {
+            if (initialTiles[i].x >= 0 && initialTiles[i].x < width && initialTiles[i].y >= 0 && initialTiles[i].y < height)
+            {
+                CreateNewTile(initialTiles[i].x, initialTiles[i].y, initialTiles[i].type);
+            }
+        }
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -75,16 +94,14 @@ public class Board : MonoBehaviour
                 // Instantiate tiles background 
                 GameObject tileBackground = Instantiate(tileBGPrefab, position, Quaternion.identity);
 
-                // Instantiate tiles content
-                CreateNewTile(x,  y, TileType.EMPTY);
+                if (!tiles[x, y])
+                {
+                    // Instantiate tiles content
+                    CreateNewTile(x, y, TileType.EMPTY);
+                }
 
             }
         }
-
-        Destroy(tiles[2, 5].gameObject);
-        Destroy(tiles[6, 5].gameObject);
-        CreateNewTile(2,5, TileType.OBSTACLE);
-        CreateNewTile(6, 5, TileType.OBSTACLE);
 
         StartCoroutine(FillBoard());
     }
