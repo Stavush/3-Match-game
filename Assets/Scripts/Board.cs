@@ -23,7 +23,16 @@ public class Board : MonoBehaviour
 
     public Level level;
 
+    public UiElements uiElements;
+
     private bool gameOver = false;
+
+    private bool isFilling = false;
+
+    public bool IsFilling
+    {
+        get { return isFilling; }
+    }
 
     [SerializeField] private GameObject tileBGPrefab;
     public TilePrefab[] tilePrefabs;
@@ -129,6 +138,7 @@ public class Board : MonoBehaviour
     public IEnumerator FillBoard()
     {
         bool refillNeeded = true;
+        isFilling = true;
 
         while (refillNeeded)
         {
@@ -142,7 +152,7 @@ public class Board : MonoBehaviour
 
             refillNeeded = ClearAllMatches();
         }
-        
+        isFilling = false;
     }
 
     public bool SingleFill()
@@ -243,11 +253,13 @@ public class Board : MonoBehaviour
 
     public bool IsSwapable(Tile tile1, Tile tile2)
     {
+        // A function that checks if 2 tiles are adjecent and can be swapped
         return (tile1.X == tile2.X && (int)Mathf.Abs(tile1.Y - tile2.Y)==1) || (tile1.Y == tile2.Y && (int)Mathf.Abs(tile1.X - tile2.X) == 1);
     }
 
     public void SwapTiles(Tile tile1, Tile tile2)
     {
+        // A function that swaps 2 tiles 
         if (gameOver)
         {
             return;
@@ -308,6 +320,7 @@ public class Board : MonoBehaviour
             }
             else
             {
+                // if there's no match, swap the tiles back to original position
                 tiles[tile1.X, tile1.Y] = tile1;
                 tiles[tile2.X, tile2.Y] = tile2;
             }
@@ -334,42 +347,216 @@ public class Board : MonoBehaviour
 
     public List<Tile> GetMatch(Tile tile, int newX, int newY)
     {
-        if (!tile.HasDesign()) return null;
-
-        TileDesign.DesignType design = tile.DesignComponent.Design;
-        var horizontalMatches = FindMatches(tile, newX, newY, true);
-        var verticalMatches = FindMatches(tile, newX, newY, false);
-
-        var allMatches = new HashSet<Tile>(horizontalMatches.Concat(verticalMatches));
-        return allMatches.Count >= 3 ? allMatches.ToList() : null;
-    }
-
-    private List<Tile> FindMatches(Tile originTile, int newX, int newY, bool horizontal)
-    {
-        List<Tile> matches = new List<Tile> { originTile };
-        int[] directions = { -1, 1 }; // Represents left/up and right/down
-
-        foreach (var dir in directions)
+        if (tile.HasDesign())
         {
-            int distance = 1;
-            while (true)
+            TileDesign.DesignType design = tile.DesignComponent.Design;
+            List<Tile> horizontalTiles = new List<Tile>();
+            List<Tile> verticalTiles = new List<Tile>();
+            List<Tile> matchingTiles = new List<Tile>();
+
+            // horitontal check
+            horizontalTiles.Add(tile);
+
+            for (int dir = 0; dir <= 1; dir++)
             {
-                int x = horizontal ? newX + dir * distance : newX;
-                int y = horizontal ? newY : newY + dir * distance;
-
-                if (x < 0 || x >= width || y < 0 || y >= height) break;
-                Tile tile = tiles[x, y];
-
-                if (tile.HasDesign() && tile.DesignComponent.Design == originTile.DesignComponent.Design)
+                for (int xDist = 1; xDist < width; xDist++)
                 {
-                    matches.Add(tile);
-                    distance++;
+                    int x;
+
+                    if (dir == 0) // left
+                    {
+                        x = newX - xDist;
+                    }
+                    else // right
+                    {
+                        x = newX + xDist;
+                    }
+
+                    if (x < 0 || x >= width)
+                    {
+                        break;
+                    }
+
+                    if (tiles[x, newY].HasDesign() && tiles[x, newY].DesignComponent.Design == design)
+                    {
+                        horizontalTiles.Add(tiles[x, newY]);
+                    }
+                    else
+                    {
+                        // no match
+                        break;
+                    }
                 }
-                else break;
+            }
+
+            if (horizontalTiles.Count >= 3)
+            {
+                for (int i = 0; i < horizontalTiles.Count; i++)
+                {
+                    matchingTiles.Add(horizontalTiles[i]);
+                }
+            }
+
+            // traverse vertically to find a L or T match
+            if(horizontalTiles.Count >= 3)
+            {
+                for(int i=0; i<horizontalTiles.Count; i++)
+                {
+                    for(int dir = 0; dir <= 1; dir++)
+                    {
+                        for(int yDist=0; yDist < height; yDist++)
+                        {
+                            int y;
+
+                            if(dir == 0)
+                            {
+                                y = newY - yDist;
+                            }
+                            else
+                            {
+                                y = newY + yDist;
+                            }
+
+                            if(y<0 || y >= height)
+                            {
+                                break;
+                            }
+
+                            if (tiles[horizontalTiles[i].X, y].HasDesign() &&  tiles[horizontalTiles[i].X, y].DesignComponent.Design == design)
+                            {
+                                verticalTiles.Add(tiles[horizontalTiles[i].X, y]);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    if(verticalTiles.Count < 2)
+                    {
+                        verticalTiles.Clear();
+                    }
+                    else
+                    {
+                        for(int j=0; j<verticalTiles.Count; j++)
+                        {
+                            matchingTiles.Add(verticalTiles[j]);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (matchingTiles.Count >= 3)
+            {
+                return matchingTiles;
+            }
+
+
+
+            // vertical check
+            verticalTiles.Clear ();
+            horizontalTiles.Clear ();
+
+            verticalTiles.Add(tile);
+
+            for (int dir = 0; dir <= 1; dir++)
+            {
+                for (int yDist = 1; yDist < width; yDist++)
+                {
+                    int y;
+
+                    if (dir == 0) // down
+                    {
+                        y = newY - yDist;
+                    }
+                    else // up
+                    {
+                        y = newY + yDist;
+                    }
+
+                    if (y < 0 || y >= width)
+                    {
+                        break;
+                    }
+
+                    if (tiles[newX, y].HasDesign() && tiles[newX, y].DesignComponent.Design == design)
+                    {
+                        verticalTiles.Add(tiles[newX, y]);
+                    }
+                    else
+                    {
+                        // no match
+                        break;
+                    }
+                }
+            }
+
+            if (verticalTiles.Count >= 3)
+            {
+                for (int i = 0; i < verticalTiles.Count; i++)
+                {
+                    matchingTiles.Add(verticalTiles[i]);
+                }
+            }
+
+            // traverse horizontally to find a L or T match
+            if (verticalTiles.Count >= 3)
+            {
+                for (int i = 0; i < verticalTiles.Count; i++)
+                {
+                    for (int dir = 0; dir <= 1; dir++)
+                    {
+                        for (int xDist = 0; xDist < width; xDist++)
+                        {
+                            int x;
+
+                            if (dir == 0) // left 
+                            {
+                                x = newX - xDist;
+                            }
+                            else // right
+                            {
+                                x = newX + xDist;
+                            }
+
+                            if (x < 0 || x >= width)
+                            {
+                                break;
+                            }
+
+                            if (tiles[x, verticalTiles[i].Y].HasDesign() && tiles[x, verticalTiles[i].Y].DesignComponent.Design == design)
+                            {
+                                horizontalTiles.Add(tiles[x, verticalTiles[i].Y]);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    if (horizontalTiles.Count < 2)
+                    {
+                        horizontalTiles.Clear();
+                    }
+                    else
+                    {
+                        for (int j = 0; j < horizontalTiles.Count; j++)
+                        {
+                            matchingTiles.Add(horizontalTiles[j]);
+                        }
+                        break;
+                    }
+                }
+            }
+            if (matchingTiles.Count >= 3)
+            {
+                return matchingTiles;
             }
         }
-
-        return matches;
+        return null;
     }
 
     public bool ClearAllMatches()
@@ -451,9 +638,37 @@ public class Board : MonoBehaviour
             tiles[x, y].ClearableComponent.Clear();
             CreateNewTile(x, y, TileType.EMPTY);
 
+            ClearObstacle(x, y);
+
             return true;
         }
         return false;
+    }
+
+    public void ClearObstacle(int x, int y)
+    {
+        for(int adjecentX = x-1; adjecentX <= x+1; adjecentX++)
+        {
+            if(adjecentX != x &&  adjecentX >= 0 && adjecentX < width) 
+            {
+                if (tiles[adjecentX, y].Type == TileType.OBSTACLE && tiles[adjecentX, y].IsClearable())
+                {
+                    tiles[adjecentX, y].ClearableComponent.Clear();
+                    CreateNewTile(adjecentX, y, TileType.EMPTY);
+                }
+            }
+        }
+        for(int adjecentY = y-1; adjecentY <= y+1; adjecentY++)
+        {
+            if (adjecentY != y && adjecentY >= 0 && adjecentY < height)
+            {
+                if (tiles[x, adjecentY].Type == TileType.OBSTACLE && tiles[x, adjecentY].IsClearable())
+                {
+                    tiles[x, adjecentY].ClearableComponent.Clear();
+                    CreateNewTile(x, adjecentY, TileType.EMPTY);
+                }
+            }
+        }
     }
 
     public void ClearRow(int row)
@@ -490,5 +705,22 @@ public class Board : MonoBehaviour
     public void GameOver()
     {
         gameOver = true;
+    }
+
+    public List<Tile> GetTilesOfType(TileType type)
+    {
+        List<Tile> tilesOfType = new List<Tile>();
+
+        for(int x=0; x<width ;x++)
+        {
+            for(int y=0; y<height ;y++)
+            {
+                if (tiles[x,y].Type == type)
+                {
+                    tilesOfType.Add(tiles[x,y]);
+                }
+            }
+        }
+        return tilesOfType;
     }
 }

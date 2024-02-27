@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1439704876553706585}
   - component: {fileID: 6453776655625413293}
+  - component: {fileID: 8300776825759789660}
+  - component: {fileID: -4830861602719255425}
   m_Layer: 0
   m_Name: obstacleTilePrefab
   m_TagString: Untagged
@@ -48,6 +50,40 @@ MonoBehaviour:
   score: 500
   movableComponent: {fileID: 0}
   tileDesign: {fileID: 0}
+--- !u!95 &8300776825759789660
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7202884389438337920}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b5b544127c67339418db45aa93daaa5d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-4830861602719255425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7202884389438337920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb2c9fd5e1557704391b04c2cd353930, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clearAnimation: {fileID: 7400000, guid: feac9c9fd9482aa47afedc16b1ca8379, type: 2}
 --- !u!1 &8829302234774645371
 GameObject:
   m_ObjectHideFlags: 0
