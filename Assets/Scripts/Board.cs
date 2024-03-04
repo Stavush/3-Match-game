@@ -6,6 +6,10 @@ using UnityEngine.Rendering;
 
 public class Board : MonoBehaviour
 {
+
+    public AudioSource swapSound;
+    public AudioClip clip;
+
     public enum TileType
     {
         EMPTY,
@@ -270,10 +274,15 @@ public class Board : MonoBehaviour
             tiles[tile1.X, tile1.Y] = tile2;
             tiles[tile2.X, tile2.Y] = tile1;
 
+
             if (GetMatch(tile1, tile2.X, tile2.Y) != null || GetMatch(tile2, tile1.X, tile1.Y) != null || tile1.Type == TileType.JOKER || tile2.Type == TileType.JOKER)
             {
+                // Play sound
+                swapSound.PlayOneShot(clip);
+
                 int tile1X = tile1.X;
                 int tile1Y = tile1.Y;
+
 
                 tile1.MovableComponent.MoveTile(tile2.X, tile2.Y, fillTime);
                 tile2.MovableComponent.MoveTile(tile1X, tile1Y, fillTime);

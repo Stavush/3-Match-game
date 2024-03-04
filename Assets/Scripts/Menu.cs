@@ -1,33 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro.EditorUtilities;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Menu : MonoBehaviour
 {
-    public InputField usernameInput;
-    public Button goButton;
-
-
-    // Start is called before the first frame update
-    void Start()
+    public void PlayGame()
     {
-        var input = gameObject.GetComponent<InputField>();
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Level Select");
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void OnGoPress()
-    {
-        PlayerPrefs.SetString("username", usernameInput.text);
-        PlayerPrefs.Save();
-
-
-        Debug.Log("username " + PlayerPrefs.GetString("username"));
-    }
 }

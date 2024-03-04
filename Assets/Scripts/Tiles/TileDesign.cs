@@ -51,6 +51,7 @@ public class TileDesign : MonoBehaviour
             if (!designSpriteDict.ContainsKey(designSprites[i].design))
             {
                 designSpriteDict.Add(designSprites[i].design, designSprites[i].sprite);
+                
             }
         }
     }
