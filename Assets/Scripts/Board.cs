@@ -105,13 +105,13 @@ public class Board : MonoBehaviour
                 // Instantiate tiles background 
                 GameObject tileBackground = Instantiate(tileBGPrefab, position, Quaternion.identity);
                 tileBackground.transform.parent = transform;
+                tileBackground.name = "BG Tile(" + x + ", " + y + ")";
 
                 if (!tiles[x, y])
                 {
                     // Instantiate tiles content
                     CreateNewTile(x, y, TileType.EMPTY);
                 }
-
             }
         }
 
@@ -120,18 +120,20 @@ public class Board : MonoBehaviour
 
     public Vector2 GetPosition(int x, int y)
     {
-        return new Vector2(x, y);
-        //return new Vector2(transform.position.x - width / 2.0f + x,
-            //transform.position.y + height / 2.0f - y);
+        //return new Vector2(x, y);
+        return new Vector2(transform.position.x + x,
+            transform.position.y + height - (y+1));
     }
 
     public Tile CreateNewTile(int x, int y, TileType type)
     {
         GameObject newTile = Instantiate(tilePrefabDict[type], GetPosition(x, y), Quaternion.identity);
+        newTile.name = "Tile(" + x + ", " + y + ")";
         newTile.transform.parent = transform;
 
         tiles[x,y] = newTile.GetComponent<Tile>();
         tiles[x, y].Init(x, y, this, type);
+        
 
         return tiles[x, y];
     }

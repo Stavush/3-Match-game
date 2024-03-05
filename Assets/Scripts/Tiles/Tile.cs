@@ -9,8 +9,6 @@ public class Tile : MonoBehaviour
     private int y;
     [SerializeField] private int score;
 
-    private Board board;
-    private Board.TileType type;
     
     public MovableTile movableComponent;
     public TileDesign tileDesign;
@@ -37,10 +35,14 @@ public class Tile : MonoBehaviour
              }
     }
 
+    private Board.TileType type;
+
     public Board.TileType Type
     {
         get { return type; }
     }
+
+    private Board board;
 
     public Board BoardRef
     {
