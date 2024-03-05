@@ -6,7 +6,6 @@ using UnityEngine.Rendering;
 
 public class Board : MonoBehaviour
 {
-
     public AudioSource swapSound;
     public AudioClip clip;
 
@@ -26,7 +25,6 @@ public class Board : MonoBehaviour
     [SerializeField] private float fillTime;
 
     public Level level;
-
     public UiElements uiElements;
 
     private bool gameOver = false;
@@ -106,6 +104,7 @@ public class Board : MonoBehaviour
 
                 // Instantiate tiles background 
                 GameObject tileBackground = Instantiate(tileBGPrefab, position, Quaternion.identity);
+                tileBackground.transform.parent = transform;
 
                 if (!tiles[x, y])
                 {

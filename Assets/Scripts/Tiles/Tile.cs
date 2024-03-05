@@ -77,19 +77,6 @@ public class Tile : MonoBehaviour
         clearableComponent = GetComponent<ClearableTile>();
     }
 
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void Init(int _x, int _y, Board _board, Board.TileType _type)
     {
         x= _x;
